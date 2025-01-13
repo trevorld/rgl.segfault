@@ -27,13 +27,17 @@ RUN apt-get install -y libxml2-dev # {xml2}
 RUN Rscript -e "install.packages('rgl', dependencies = TRUE)"
 
 # Install development version of {rgl}
-# RUN git clone https://github.com/dmurdoch/rgl.git
-# RUN R CMD build rgl # segfaults
-# RUN R CMD INSTALL rgl*.tar.gz
+RUN git clone https://github.com/dmurdoch/rgl.git
+# WORKDIR "/rgl"
+# RUN git checkout 0fa82fa # Last commit new segfault does not occur
+# RUN git checkout eab8a4c # First commit new segfault occurs
+# WORKDIR "/"
+RUN RGL_USE_NULL=TRUE R CMD build rgl
+RUN R CMD INSTALL rgl*.tar.gz
 
 # Run {rgl.segfault} reprex
 RUN git clone https://github.com/trevorld/rgl.segfault.git
 RUN R CMD build rgl.segfault
-# RUN R CMD check rgl.segfault*.tar.gz # reproduces error
+RUN R CMD check rgl.segfault*.tar.gz || true
 
 CMD ["bash"]
